@@ -409,19 +409,6 @@ document.getElementById('add-ativo').addEventListener('click',()=>{
   document.getElementById('modal').classList.add('show');
 });
 
-function renderAtivos(){
-  const el=document.getElementById('holdings');
-  if(!state.holdings.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum papel cadastrado. Clique em <b>+ Adicionar papel</b>.</div>';return;}
-  el.innerHTML=state.holdings.map((s,i)=>`<div class="card hold">
-    <input class="tk" style="border:none;font-weight:600;padding:0;font-size:15px" value="${s.t}" onchange="updStock(${i},'t',this.value)">
-    <div class="qwrap"><input type="text" inputmode="numeric" value="${s.q}" onchange="updStock(${i},'q',this.value)"></div>
-    <button class="icon-btn del rm" title="Remover" onclick="rmStock(${i})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
-  </div>`).join('');
-}
-window.updStock=(i,f,v)=>{state.holdings[i][f]=f==='q'?(parseInt((''+v).replace(/\D/g,''))||0):(''+v).toUpperCase().trim();save();if(f==='t')renderAtivos();};
-window.rmStock=i=>{state.holdings.splice(i,1);save();renderAtivos();};
-document.getElementById('add-stock').addEventListener('click',()=>{state.holdings.push({t:'NOVO3',q:0});save();renderAtivos();});
-
 /* ============ RELATORIO ============ */
 function renderRelatorio(){
   const C=computed();const byYear={};
