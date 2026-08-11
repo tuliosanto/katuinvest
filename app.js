@@ -1,5 +1,4 @@
-</script>
-<script>
+
 /* ============ Estado & persistência ============ */
 const KEY='nosso_patrimonio_v1';
 const CLASSES=[
@@ -218,8 +217,7 @@ function renderLancar(){
   const dateVal = editIndex!==null ? base.date : today;
   let html=`<div class="field" style="grid-column:1/-1;max-width:220px"><label>Data do fechamento</label>
     <div class="inp date"><input type="date" id="f-date" value="${dateVal}"></div></div>`;
-  
-  let html='';
+
   CLASSES.forEach(c=>{
     if(c.id === 'dolar') {
       html+=`<div class="field"><label style="color:${c.cor}">${c.nome}</label><div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="${c.id}" value=""></div></div>`;
