@@ -153,35 +153,78 @@ tbody tr:hover{background:var(--line-soft)}
 .hold .qwrap{display:flex;align-items:center;gap:6px}
 .hold input{width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 8px;text-align:right}
 .hold .rm{align-self:flex-end}
-/* sub-ativos */
-.clsblk{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
-.clsblk>summary,.clsblk .clshead{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--line-soft)}
-.clsblk>summary::-webkit-details-marker{display:none}
-.clsblk .cdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
-.clsblk .cnome{font-weight:600;font-size:14px}
-.clsblk .ctot{margin-left:auto;font-weight:600;font-size:14.5px}
-.clsblk .cchev{transition:transform .15s;color:var(--ink-soft);line-height:0}
-.clsblk[open] .cchev{transform:rotate(90deg)}
-.subrows{padding:8px 14px 12px;display:flex;flex-direction:column;gap:7px}
-.subrow{display:grid;grid-template-columns:1fr 118px;gap:8px;align-items:center}
-.subrow.acao{grid-template-columns:1fr 86px 106px 118px}
-.subrow .snome{font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.subrow .inp input{padding:7px 9px;text-align:right;font-size:13.5px}
-.subrow .inp .pre{font-size:11.5px;padding-left:9px;white-space:nowrap}
-.subrow.outros{border-top:1px dashed var(--line);padding-top:9px;margin-top:2px}
-.subrow.outros .snome{color:var(--ink-soft);font-style:italic}
-.subhead{display:grid;grid-template-columns:1fr 86px 106px 118px;gap:8px;padding:0 14px;font-size:11px;color:#9AA79F;text-transform:uppercase;letter-spacing:.04em}
+/* ---- sub-ativos: blocos do lançamento ---- */
+.clsblk{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.clsblk+.clsblk{margin-top:-4px}
+.clsblk.open{border-color:#CFE2D8;box-shadow:0 2px 12px rgba(30,110,90,.07)}
+.clsbar{display:flex;align-items:center;gap:10px;padding:9px 12px 9px 0;cursor:pointer}
+.clsbar:hover{background:#FCFDFC}
+.cstripe{width:3px;align-self:stretch;border-radius:0 3px 3px 0;flex:0 0 auto}
+.cchev{border:none;background:none;padding:2px;color:#B4BEB8;line-height:0;transition:transform .18s,color .15s;flex:0 0 auto}
+.clsblk.open .cchev{transform:rotate(90deg);color:var(--emerald)}
+.cnome{font-weight:600;font-size:14px;flex:0 0 auto}
+.cstatus{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;white-space:nowrap;letter-spacing:.01em}
+.cstatus.ok{background:var(--emerald-tint);color:var(--emerald)}
+.cstatus.falta{background:var(--gold-tint);color:#8A6414}
+.cstatus.excede{background:var(--rose-tint);color:var(--rose)}
+.cstatus.livre{background:var(--line-soft);color:var(--ink-soft)}
+.ctotal{margin-left:auto;width:148px;flex:0 0 auto}
+.ctotal input{text-align:right;font-weight:600}
+.clsbody{display:none;padding:0 13px 13px;border-top:1px solid var(--line-soft)}
+.clsblk.open .clsbody{display:block}
+.prog{height:4px;border-radius:3px;background:var(--line-soft);margin:12px 1px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--emerald);border-radius:3px;transition:width .25s}
+.prog.excede i{background:var(--rose)}
+.subhead,.subrow{display:grid;grid-template-columns:minmax(84px,1fr) 132px;gap:8px;align-items:center}
+.subhead.acao,.subrow.acao{grid-template-columns:minmax(84px,1fr) 76px 106px 132px}
+.subrows{display:flex;flex-direction:column;gap:5px}
+.subhead{font-size:10.5px;color:#A8B2AC;text-transform:uppercase;letter-spacing:.06em;padding:0 3px 5px}
 .subhead span{text-align:right}
 .subhead span:first-child{text-align:left}
-.clsblk .vazio{padding:10px 14px 14px;font-size:13px;color:var(--ink-soft)}
-.ativos-cls{margin-bottom:18px}
-.ativos-cls .clshead{border-radius:12px 12px 0 0}
-.sublist{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
-.subedit{display:grid;grid-template-columns:1fr 96px 34px;gap:8px;align-items:center}
+.snome{width:100%;border:1px solid transparent;border-radius:7px;padding:7px 9px;font:inherit;font-size:13.5px;background:transparent;color:var(--ink);text-overflow:ellipsis}
+.snome:hover{border-color:var(--line);background:#fff}
+.snome:focus{border-color:var(--emerald);outline:none;background:#fff;box-shadow:0 0 0 3px var(--emerald-tint)}
+.snome::placeholder{color:#B4BEB8;font-style:italic}
+.subrow .inp input{padding:7px 9px;text-align:right;font-size:13.5px}
+.subrow .inp .pre{font-size:11px;padding-left:9px}
+.subrow.outros{margin-top:9px;padding-top:10px;border-top:1px dashed var(--line)}
+.subrow.outros .lbl{font-size:13px;color:var(--ink-soft);padding-left:9px}
+.subrow.outros .inp{background:var(--line-soft);border-style:dashed}
+.subrow.outros .inp input{color:var(--ink-soft);font-weight:600}
+.subrow.outros.neg .inp input{color:var(--rose)}
+.clsfoot{display:flex;align-items:center;gap:14px;margin-top:11px;padding-left:1px;flex-wrap:wrap}
+.clsvazio{font-size:13px;color:var(--ink-soft);padding:11px 1px 3px;line-height:1.55;max-width:520px}
+.clsblk.semdet .clsbar{cursor:default}
+.clsblk.semdet .clsbar:hover{background:transparent}
+.secdiv{display:flex;align-items:center;gap:12px;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#A8B2AC;font-weight:600;margin:10px 0 0}
+.secdiv:after{content:'';flex:1;height:1px;background:var(--line-soft)}
+/* ---- sub-ativos: aba de cadastro ---- */
+.ativos-cls{margin-bottom:14px;overflow:hidden}
+.ativos-cls .clshead{display:flex;align-items:center;gap:10px;padding:0 14px 0 0}
+.ativos-cls .clshead .pad{padding:13px 0;display:flex;align-items:center;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+.ativos-cls.alvo{border-color:var(--emerald);box-shadow:0 0 0 3px var(--emerald-tint)}
+.cvalor{text-align:right;line-height:1.25}
+.cvalor .n{font-weight:600;font-size:14.5px;font-family:'Fraunces',Georgia,serif}
+.cvalor .s{font-size:10.5px;color:#A8B2AC;text-transform:uppercase;letter-spacing:.05em}
+.sublist{display:flex;flex-direction:column;gap:8px;padding:13px 14px}
+.subedit{display:grid;grid-template-columns:1fr 100px 34px;gap:9px;align-items:center}
 .subedit.semq{grid-template-columns:1fr 34px}
-.subedit input{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;font-size:13.5px;background:#fff}
+.subedit input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;font-size:13.5px;background:#fff}
+.subedit input:focus{border-color:var(--emerald);outline:none;box-shadow:0 0 0 3px var(--emerald-tint)}
 .subedit input.q{text-align:right}
-@media(max-width:640px){.subrow.acao{grid-template-columns:1fr 1fr;row-gap:6px}.subhead{display:none}}
+.subedit .qlab{position:relative}
+/* ---- legenda do painel, clicável ---- */
+.legend .row.link{cursor:pointer;border-radius:8px;margin:-5px -7px;padding:5px 7px;transition:background .13s}
+.legend .row.link:hover{background:var(--line-soft)}
+.legend .row .go{opacity:.3;color:var(--emerald);line-height:0;transition:opacity .15s,transform .15s;flex:0 0 auto}
+.legend .row.link:hover .go{opacity:1;transform:translateX(2px)}
+.legend-tip{font-size:11.5px;color:#A8B2AC;margin:14px 0 0;padding-top:11px;border-top:1px solid var(--line-soft)}
+@media(max-width:640px){
+  .subhead{display:none}
+  .subrow.acao{grid-template-columns:1fr 1fr;row-gap:5px}
+  .subrow.acao .snome{grid-column:1/-1}
+  .ctotal{width:124px}
+}
 
 /* backup cards */
 .tool{padding:20px 22px;display:flex;flex-direction:column;gap:10px}
@@ -629,16 +672,24 @@ function renderPainel(){
 
 function renderAlloc(last){
   const items = allocMode==='grupo'
-    ? GRUPOS.map(g=>({nome:g.nome,cor:g.cor,val:g.membros.reduce((s,id)=>s+(+last[id]||0),0)}))
-    : CLASSES.map(c=>({nome:c.nome,cor:c.cor,val:+last[c.id]||0}));
+    ? GRUPOS.map(g=>({nome:g.nome,cor:g.cor,grupo:g.id,val:g.membros.reduce((s,id)=>s+(+last[id]||0),0)}))
+    : CLASSES.map(c=>({nome:c.nome,cor:c.cor,cls:c.id,val:+last[c.id]||0}));
   const tot=items.reduce((s,x)=>s+x.val,0);
   items.forEach(x=>x.pct=tot?x.val/tot:0);
   items.sort((a,b)=>b.val-a.val);
   donut('donut',items);
-  document.getElementById('alloc-legend').innerHTML=items.map(x=>`
-    <div class="row"><span class="dot" style="background:${x.cor}"></span>
-    <span class="name">${x.nome}</span><span class="val num">${brl(x.val,0)}</span><span class="pct num">${pct(x.pct)}</span></div>`).join('');
+  /* Cada fatia leva ao seu cadastro: classe → sub-ativos daquela classe;
+     grupo → abre a visão por classe, que é onde a edição existe. */
+  const seta='<span class="go"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></span>';
+  document.getElementById('alloc-legend').innerHTML=items.map(x=>{
+    const alvo=x.cls&&podeDetalhar(x.cls);
+    const acao=alvo?`onclick="irParaAtivos('${x.cls}')" title="Editar os sub-ativos de ${x.nome}"`
+      :(x.grupo?`onclick="verClasses()" title="Ver por classe"`:`title="${x.nome} é um ativo único"`);
+    return `<div class="row${alvo||x.grupo?' link':''}" ${acao}><span class="dot" style="background:${x.cor}"></span>
+    <span class="name">${x.nome}</span>${alvo||x.grupo?seta:''}<span class="val num">${brl(x.val,0)}</span><span class="pct num">${pct(x.pct)}</span></div>`;
+  }).join('')+`<p class="legend-tip">${allocMode==='grupo'?'Clique num grupo para abrir as classes que o compõem.':'Clique numa classe para cadastrar ou editar seus ativos.'}</p>`;
 }
+window.verClasses=()=>{document.querySelector('#alloc-toggle button[data-mode="classe"]').click();};
 document.getElementById('alloc-toggle').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return;
   allocMode=b.dataset.mode;
@@ -710,62 +761,89 @@ function renderBars(C){
 }
 
 /* ============ LANCAR ============ */
-/* Bloco de uma classe no lançamento: campo único (sem sub-ativos cadastrados)
-   ou lista expansível com um campo por sub-ativo + sobra "não detalhado". */
-function classBlockHTML(c,base,filled){
-  const subs=subsOf(c.id);
-  if(!podeDetalhar(c.id)||!subs.length){
-    return `<div class="field"><label>${c.nome} <span class="hint">R$</span></label>
-      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="${c.id}" value="${filled?fmtInput(base[c.id]):''}" placeholder="0,00"></div></div>`;
-  }
-  const det=(base.det&&base.det[c.id])||{};
-  const acao=c.id==='acoes';
-  /* Meses antigos (ou parcialmente detalhados) não têm `_outros` gravado.
-     A sobra é deduzida do total já lançado, para que abrir um mês antigo
-     para edição nunca zere a classe. */
-  const somaItens=subs.reduce((t,s)=>t+((det[s.id]&&+det[s.id].v)||0),0);
-  const outrosV=det._outros!=null?+det._outros:Math.max(0,Math.round(((+base[c.id]||0)-somaItens)*100)/100);
-  const rows=subs.map(s=>{
-    const it=det[s.id]||{};
-    const q=it.q!=null?it.q:(+s.q||0);
-    return `<div class="subrow${acao?' acao':''}" data-sub="${s.id}">
-      <div class="snome" title="${s.nome}">${s.nome}</div>
-      ${acao?`<div class="inp"><input type="text" inputmode="numeric" data-q="1" value="${q}" title="Quantidade"></div>
-      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-p="1" value="${it.p!=null?fmtInput(it.p):''}" placeholder="preço" title="Preço unitário"></div>`:''}
-      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-v="1" value="${it.v!=null?fmtInput(it.v):''}" placeholder="0,00" title="Valor total"></div>
-    </div>`;
-  }).join('');
-  return `<div class="clsblk" data-cls="${c.id}" style="grid-column:1/-1">
-    <details ${filled?'':'open'}>
-      <summary>
-        <span class="cchev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></span>
-        <span class="cdot" style="background:${c.cor}"></span>
-        <span class="cnome">${c.nome}</span>
-        <span class="hint" style="font-size:11.5px;color:#9AA79F">${subs.length} ${subs.length===1?'item':'itens'}</span>
-        <span class="ctot num">—</span>
-      </summary>
-      ${acao?`<div class="subhead"><span>Papel</span><span>Qtd</span><span>Preço</span><span>Valor</span></div>`:''}
-      <div class="subrows">
-        ${rows}
-        <div class="subrow outros">
-          <div class="snome">Não detalhado</div>
-          ${acao?'<div></div><div></div>':''}
-          <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-o="1" value="${filled&&outrosV?fmtInput(outrosV):''}" placeholder="0,00"></div>
-        </div>
-      </div>
-    </details>
-    <input type="hidden" data-f="${c.id}" value="">
+/* Bloco de uma classe no lançamento.
+   O total da classe é editável e manda; os sub-ativos apenas o repartem.
+   "Não detalhado" é o resíduo (total − soma dos itens), calculado sozinho —
+   é assim que dá para abrir um CDB de R$ 200 mil já lançado e ir separando
+   item por item, vendo o que falta, sem que o total se mexa. */
+let clsAberta=new Set();
+
+function subRowHTML(c,s,it,acao){
+  const q=it.q!=null?it.q:(+s.q||0);
+  return `<div class="subrow${acao?' acao':''}" data-sub="${s.id}">
+    <input class="snome" data-n="1" value="${(s.nome||'').replace(/"/g,'&quot;')}" placeholder="nome do ativo" onchange="updSub('${c.id}','${s.id}','nome',this.value)">
+    ${acao?`<div class="inp"><input type="text" inputmode="numeric" data-q="1" value="${q}" title="Quantidade de cotas"></div>
+    <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-p="1" value="${it.p!=null?fmtInput(it.p):''}" placeholder="preço" title="Preço unitário"></div>`:''}
+    <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-v="1" value="${it.v!=null?fmtInput(it.v):''}" placeholder="0,00" title="Valor total do ativo"></div>
   </div>`;
 }
 
-/* Recalcula o total de um bloco a partir dos sub-ativos e alimenta o campo
-   oculto que o resto do app (preview, save, gráficos) já consome. */
+function classBlockHTML(c,base,filled){
+  const subs=subsOf(c.id);
+  const totVal=filled?fmtInput(base[c.id]):'';
+  if(!podeDetalhar(c.id)){
+    return `<div class="clsblk semdet" data-cls="${c.id}" style="grid-column:1/-1">
+      <div class="clsbar">
+        <span class="cstripe" style="background:${c.cor}"></span>
+        <span class="cchev" style="visibility:hidden"><svg width="13" height="13"></svg></span>
+        <span class="cnome">${c.nome}</span>
+        <span class="cstatus livre">ativo único</span>
+        <div class="inp ctotal"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="${c.id}" value="${totVal}" placeholder="0,00"></div>
+      </div></div>`;
+  }
+  const det=(base.det&&base.det[c.id])||{};
+  const acao=c.id==='acoes';
+  const corpo = subs.length
+    ? `${acao?'<div class="subhead acao"><span>Papel</span><span>Qtd</span><span>Preço</span><span>Valor</span></div>':''}
+       <div class="subrows">${subs.map(s=>subRowHTML(c,s,det[s.id]||{},acao)).join('')}</div>
+       <div class="subrow outros${acao?' acao':''}">
+         <div class="lbl">Não detalhado</div>
+         ${acao?'<div></div><div></div>':''}
+         <div class="inp"><span class="pre">R$</span><input type="text" data-o="1" value="" readonly tabindex="-1"></div>
+       </div>`
+    : `<div class="clsvazio">Nenhum sub-ativo cadastrado — <b>${c.nome}</b> está lançado como um valor único de <b class="cvazio-tot"></b>. Adicione os itens abaixo e vá repartindo esse valor; o que ainda não estiver separado fica em <b>“Não detalhado”</b>.</div>`;
+  return `<div class="clsblk${clsAberta.has(c.id)?' open':''}" data-cls="${c.id}" style="grid-column:1/-1">
+    <div class="clsbar">
+      <span class="cstripe" style="background:${c.cor}"></span>
+      <button type="button" class="cchev" tabindex="-1"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></button>
+      <span class="cnome">${c.nome}</span>
+      <span class="cstatus livre">—</span>
+      <div class="inp ctotal"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="${c.id}" value="${totVal}" placeholder="0,00" title="Total da classe"></div>
+    </div>
+    <div class="clsbody">
+      <div class="prog"><i style="width:0%"></i></div>
+      ${corpo}
+      <div class="clsfoot">
+        <button type="button" class="btn link" onclick="addSubInline('${c.id}')">+ Adicionar ${acao?'papel':'item'}</button>
+        ${subs.length?`<button type="button" class="btn link" style="color:var(--ink-soft)" onclick="irParaAtivos('${c.id}')">Gerenciar cadastro</button>`:''}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* Recalcula um bloco: resíduo, status e barra de progresso. */
 function recalcCls(blk){
-  let t=0;
-  blk.querySelectorAll('.subrow[data-sub]').forEach(r=>{ t+=parseNum(r.querySelector('[data-v]').value); });
-  const oEl=blk.querySelector('[data-o]'); if(oEl)t+=parseNum(oEl.value);
-  blk.querySelector('input[data-f]').value=fmtInput(t);
-  blk.querySelector('.ctot').textContent=brl(t,0);
+  if(blk.classList.contains('semdet'))return;
+  const totEl=blk.querySelector('input[data-f]');
+  const linhas=blk.querySelectorAll('.subrow[data-sub] [data-v]');
+  let soma=0; linhas.forEach(i=>soma+=parseNum(i.value));
+  soma=Math.round(soma*100)/100;
+  let tot=parseNum(totEl.value);
+  // classe ainda sem total lançado: os itens definem o total
+  if(!tot&&soma){tot=soma;totEl.value=fmtInput(tot);}
+  const resto=Math.round((tot-soma)*100)/100;
+  const oEl=blk.querySelector('[data-o]');
+  if(oEl){oEl.value=fmtInput(resto);oEl.closest('.subrow').classList.toggle('neg',resto<-0.004);}
+  const vz=blk.querySelector('.cvazio-tot'); if(vz)vz.textContent=brl(tot,2);
+  const chip=blk.querySelector('.cstatus');
+  const pr=blk.querySelector('.prog');
+  if(!linhas.length){ chip.className='cstatus livre'; chip.textContent='valor único'; }
+  else if(resto>0.004){ chip.className='cstatus falta'; chip.textContent='falta '+brl(resto,2); }
+  else if(resto<-0.004){ chip.className='cstatus excede'; chip.textContent='excede '+brl(-resto,2); }
+  else if(tot){ chip.className='cstatus ok'; chip.textContent='tudo detalhado'; }
+  else { chip.className='cstatus livre'; chip.textContent='sem valor'; }
+  pr.classList.toggle('excede',resto<-0.004);
+  pr.querySelector('i').style.width=(tot>0?Math.min(100,Math.abs(soma)/tot*100):0)+'%';
 }
 function recalcAllCls(){document.querySelectorAll('#lancar-form .clsblk').forEach(recalcCls);}
 
@@ -783,6 +861,20 @@ function onSubInput(e){
   const blk=e.target.closest('.clsblk'); if(blk)recalcCls(blk);
 }
 
+/* Cadastra um sub-ativo sem sair do lançamento, preservando o que já
+   estiver digitado no formulário. */
+window.addSubInline=cls=>{
+  const atual=readForm();
+  state.subativos[cls].push({id:uid(),nome:'',q:cls==='acoes'?0:undefined});
+  if(cls==='acoes')syncHoldings();
+  save();
+  clsAberta.add(cls);
+  baseOverride=atual;
+  renderLancar();
+  const campos=document.querySelectorAll(`.clsblk[data-cls="${cls}"] .snome`);
+  if(campos.length)campos[campos.length-1].focus();
+};
+
 function renderLancar(){
   const C=computed();const prev=C[C.length-1];
   const form=document.getElementById('lancar-form');
@@ -792,7 +884,9 @@ function renderLancar(){
   const dateVal = editIndex!==null ? base.date : today;
   let html=`<div class="field" style="grid-column:1/-1;max-width:220px"><label>Data do fechamento</label>
     <div class="inp date"><input type="date" id="f-date" value="${dateVal}"></div></div>`;
+  html+=`<div class="secdiv" style="grid-column:1/-1"><span>Onde está o dinheiro</span></div>`;
   CLASSES.forEach(c=>{ html+=classBlockHTML(c,base,filled); });
+  html+=`<div class="secdiv" style="grid-column:1/-1"><span>Movimentação do mês</span></div>`;
   html+=`<div class="field"><label>Aporte do mês <span class="hint">dinheiro novo</span></label>
     <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="aporte" value="${filled?fmtInput(base.aporte):''}" placeholder="0,00"></div></div>
     <div class="field"><label>Dividendos recebidos</label>
@@ -817,7 +911,26 @@ function renderLancar(){
   const form=document.getElementById('lancar-form');
   form.addEventListener('input',e=>{onSubInput(e);updatePreview();});
   form.addEventListener('change',e=>{if(e.target.id==='f-date')updatePreview();});
+  // abrir/fechar um bloco de classe (menos ao clicar no campo de total)
+  form.addEventListener('click',e=>{
+    const bar=e.target.closest('.clsbar'); if(!bar)return;
+    if(e.target.closest('.ctotal'))return;
+    const blk=bar.closest('.clsblk');
+    if(blk.classList.contains('semdet'))return;
+    blk.classList.toggle('open');
+    if(blk.classList.contains('open'))clsAberta.add(blk.dataset.cls);else clsAberta.delete(blk.dataset.cls);
+  });
 })();
+
+/* Painel e lançamento levam ao cadastro da classe, já destacado. */
+window.irParaAtivos=cls=>{
+  goTo('ativos');
+  const card=document.querySelector(`.ativos-cls[data-cls="${cls}"]`);
+  if(!card)return;
+  card.scrollIntoView({behavior:'smooth',block:'center'});
+  card.classList.add('alvo');
+  setTimeout(()=>card.classList.remove('alvo'),1800);
+};
 function fmtInput(v){return (v==null||v==='')?'':(+v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function parseNum(s){if(s==null)return 0;s=(''+s).trim();if(!s)return 0;s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:n;}
 function readForm(){
@@ -835,6 +948,7 @@ function readForm(){
       if(pEl){const pv=parseNum(pEl.value);if(pv)it.p=pv;}
       d[r.dataset.sub]=it;
     });
+    if(!Object.keys(d).length)return; // classe sem sub-ativos: segue como valor único
     const oEl=blk.querySelector('[data-o]');const outros=oEl?parseNum(oEl.value):0;
     if(outros)d._outros=outros;
     o.det[blk.dataset.cls]=d;
@@ -906,32 +1020,53 @@ window.editMonth=i=>{editIndex=i;goTo('lancar');renderLancar();};
 window.delMonth=i=>{const m=state.months[i];confirmModal('Excluir lançamento?',`O registro de <b>${mLabel(m.date,true)}</b> será removido. Isso não pode ser desfeito.`,()=>{state.months.splice(i,1);save();renderAll();toast('Lançamento excluído.');});};
 
 /* ============ ATIVOS (cadastro de sub-ativos) ============ */
-const PLACEHOLDER={acoes:'PETR4',cdb:'CDB Banco X 110% CDI',fii:'HGLG11',caixa:'Conta corrente',cripto:'Bitcoin',etf_bdr:'IVVB11'};
+const PLACEHOLDER={acoes:'ex.: PETR4',cdb:'ex.: CDB Banco X 110% CDI',fii:'ex.: HGLG11',caixa:'ex.: Conta corrente',cripto:'ex.: Bitcoin',etf_bdr:'ex.: IVVB11'};
+
+/* Quanto da classe já está repartido em sub-ativos, no mês mais recente. */
+function statusClasse(cls){
+  const ult=state.months[state.months.length-1];
+  const tot=ult?(+ult[cls]||0):0;
+  const d=(ult&&ult.det&&ult.det[cls])||{};
+  const soma=Object.keys(d).filter(k=>k!=='_outros').reduce((t,k)=>t+(+d[k].v||0),0);
+  return {tot,soma:Math.round(soma*100)/100,resto:Math.round((tot-soma)*100)/100};
+}
 
 function renderAtivos(){
   const el=document.getElementById('ativos-lista');
+  const ult=state.months[state.months.length-1];
   el.innerHTML=CLASSES.filter(c=>podeDetalhar(c.id)).map(c=>{
     const subs=subsOf(c.id);const acao=c.id==='acoes';
+    const st=statusClasse(c.id);
+    let chip;
+    if(!subs.length)chip='<span class="cstatus livre">valor único</span>';
+    else if(st.resto>0.004)chip=`<span class="cstatus falta">falta ${brl(st.resto,2)}</span>`;
+    else if(st.resto<-0.004)chip=`<span class="cstatus excede">excede ${brl(-st.resto,2)}</span>`;
+    else if(st.tot)chip='<span class="cstatus ok">tudo detalhado</span>';
+    else chip='<span class="cstatus livre">sem valor</span>';
     const linhas=subs.map(sub=>`<div class="subedit${acao?'':' semq'}">
-      <input value="${sub.nome.replace(/"/g,'&quot;')}" onchange="updSub('${c.id}','${sub.id}','nome',this.value)" placeholder="Nome do ativo">
+      <input value="${(sub.nome||'').replace(/"/g,'&quot;')}" placeholder="${PLACEHOLDER[c.id]}" onchange="updSub('${c.id}','${sub.id}','nome',this.value)">
       ${acao?`<input class="q" type="text" inputmode="numeric" value="${+sub.q||0}" onchange="updSub('${c.id}','${sub.id}','q',this.value)" title="Quantidade de cotas">`:''}
       <button class="icon-btn del" title="Remover" onclick="rmSub('${c.id}','${sub.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
     </div>`).join('');
-    return `<div class="card ativos-cls">
+    return `<div class="card ativos-cls" data-cls="${c.id}">
       <div class="clshead">
-        <span class="cdot" style="background:${c.cor}"></span>
-        <span class="cnome">${c.nome}</span>
-        <span class="hint" style="font-size:11.5px;color:#9AA79F">${subs.length?subs.length+(subs.length===1?' item':' itens'):'sem detalhamento'}</span>
-        <button class="btn ghost sm" style="margin-left:auto" onclick="addSub('${c.id}')">+ Adicionar</button>
+        <span class="cstripe" style="background:${c.cor}"></span>
+        <div class="pad">
+          <span class="cnome">${c.nome}</span>
+          <span style="font-size:11.5px;color:#A8B2AC">${subs.length?subs.length+(subs.length===1?' item':' itens'):'sem detalhamento'}</span>
+          ${chip}
+        </div>
+        <div class="cvalor"><div class="n">${brl(st.tot,0)}</div><div class="s">${ult?mLabel(ult.date):'—'}</div></div>
+        <button class="btn ghost sm" onclick="addSub('${c.id}')">+ Adicionar</button>
       </div>
       ${subs.length?`<div class="sublist">${linhas}</div>`
-        :`<div class="vazio">Sem sub-ativos. Enquanto estiver assim, <b>${c.nome}</b> continua sendo lançado como um valor único.</div>`}
+        :`<div class="clsvazio" style="padding:14px">Sem sub-ativos: <b>${c.nome}</b> é lançado como um valor único de <b>${brl(st.tot,0)}</b>. Cadastre os itens aqui — ou direto no <a href="#" onclick="goTo('lancar');return false" style="color:var(--emerald);font-weight:600">Novo lançamento</a>, repartindo o valor conforme cadastra.</div>`}
     </div>`;
-  }).join('')+`<p class="tip">O Dólar não aparece aqui: é um ativo único, lançado direto.</p>`;
+  }).join('')+`<p class="tip">Os valores mostrados são do mês mais recente${ult?' ('+mLabel(ult.date,true)+')':''}. O Dólar não aparece aqui: é um ativo único, lançado direto.</p>`;
 }
 
 window.addSub=cls=>{
-  state.subativos[cls].push({id:uid(),nome:PLACEHOLDER[cls]||'Novo ativo',q:cls==='acoes'?0:undefined});
+  state.subativos[cls].push({id:uid(),nome:'',q:cls==='acoes'?0:undefined});
   if(cls==='acoes')syncHoldings();
   save();renderAtivos();
 };
