@@ -153,6 +153,35 @@ tbody tr:hover{background:var(--line-soft)}
 .hold .qwrap{display:flex;align-items:center;gap:6px}
 .hold input{width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 8px;text-align:right}
 .hold .rm{align-self:flex-end}
+/* sub-ativos */
+.clsblk{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.clsblk>summary,.clsblk .clshead{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--line-soft)}
+.clsblk>summary::-webkit-details-marker{display:none}
+.clsblk .cdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.clsblk .cnome{font-weight:600;font-size:14px}
+.clsblk .ctot{margin-left:auto;font-weight:600;font-size:14.5px}
+.clsblk .cchev{transition:transform .15s;color:var(--ink-soft);line-height:0}
+.clsblk[open] .cchev{transform:rotate(90deg)}
+.subrows{padding:8px 14px 12px;display:flex;flex-direction:column;gap:7px}
+.subrow{display:grid;grid-template-columns:1fr 118px;gap:8px;align-items:center}
+.subrow.acao{grid-template-columns:1fr 86px 106px 118px}
+.subrow .snome{font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.subrow .inp input{padding:7px 9px;text-align:right;font-size:13.5px}
+.subrow .inp .pre{font-size:11.5px;padding-left:9px;white-space:nowrap}
+.subrow.outros{border-top:1px dashed var(--line);padding-top:9px;margin-top:2px}
+.subrow.outros .snome{color:var(--ink-soft);font-style:italic}
+.subhead{display:grid;grid-template-columns:1fr 86px 106px 118px;gap:8px;padding:0 14px;font-size:11px;color:#9AA79F;text-transform:uppercase;letter-spacing:.04em}
+.subhead span{text-align:right}
+.subhead span:first-child{text-align:left}
+.clsblk .vazio{padding:10px 14px 14px;font-size:13px;color:var(--ink-soft)}
+.ativos-cls{margin-bottom:18px}
+.ativos-cls .clshead{border-radius:12px 12px 0 0}
+.sublist{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
+.subedit{display:grid;grid-template-columns:1fr 96px 34px;gap:8px;align-items:center}
+.subedit.semq{grid-template-columns:1fr 34px}
+.subedit input{width:100%;border:1px solid var(--line);border-radius:7px;padding:7px 9px;font:inherit;font-size:13.5px;background:#fff}
+.subedit input.q{text-align:right}
+@media(max-width:640px){.subrow.acao{grid-template-columns:1fr 1fr;row-gap:6px}.subhead{display:none}}
 
 /* backup cards */
 .tool{padding:20px 22px;display:flex;flex-direction:column;gap:10px}
@@ -261,7 +290,7 @@ const FIREBASE_CONFIG = {
       <button data-v="painel" class="active">Painel</button>
       <button data-v="lancar">Novo lançamento</button>
       <button data-v="historico">Histórico</button>
-      <button data-v="acoes">Ações</button>
+      <button data-v="ativos">Ativos</button>
       <button data-v="relatorio">Relatório anual</button>
       <button data-v="projecoes">Projeções</button>
       <button data-v="dados">Backup</button>
@@ -335,14 +364,13 @@ const FIREBASE_CONFIG = {
     <p class="tip">Passe o mouse sobre uma linha para editar ou excluir. Variação e rendimento são calculados a partir dos totais.</p>
   </section>
 
-  <!-- ACOES -->
-  <section class="view" id="v-acoes">
-    <div style="display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:8px">
-      <div><p class="section-label">Carteira de ações</p><h2 style="margin:2px 0;font-size:24px">Quantidade por papel</h2></div>
-      <button class="btn ghost sm" id="add-stock" style="margin-left:auto">+ Adicionar papel</button>
+  <!-- ATIVOS -->
+  <section class="view" id="v-ativos">
+    <div style="margin-bottom:8px">
+      <p class="section-label">Cadastro</p><h2 style="margin:2px 0;font-size:24px">Ativos e sub-ativos</h2>
     </div>
-    <p style="color:var(--ink-soft);margin:0 0 18px;font-size:14px">Quantas cotas vocês têm de cada ativo. Edite direto no campo — salva sozinho.</p>
-    <div class="grid hold-grid" id="holdings"></div>
+    <p style="color:var(--ink-soft);margin:0 0 18px;font-size:14px;max-width:640px">Cadastre aqui <b>quais</b> CDBs, criptos, fundos e papéis vocês têm. No <b>Novo lançamento</b> cada um ganha seu próprio campo, em vez de um valor único por classe. Edite direto no campo — salva sozinho.</p>
+    <div id="ativos-lista"></div>
   </section>
 
   <!-- RELATORIO -->
@@ -466,25 +494,59 @@ const YEAR_ANCHORS={2021:238057.66, 2022:298010.45};
 const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
 const MESL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-let state={months:[],holdings:[]};
+let state={months:[],holdings:[],subativos:{}};
 let allocMode='grupo';
 let editIndex=null;
 let hasStorage=true;
+let baseOverride=null;
+
+/* ---- Sub-ativos ----
+   Toda classe, menos Dólar (ativo único), pode ser detalhada em sub-ativos.
+   Cadastro:  state.subativos[classe] = [{id, nome, q?}]
+   Por mês:   m.det[classe] = {[subId]: {v, q?, p?}, _outros: valor não detalhado}
+   O total da classe (m[classe]) continua sendo a fonte de verdade para todos
+   os gráficos e relatórios — os detalhes apenas o alimentam. Meses antigos,
+   sem `det`, seguem funcionando como valor agregado.                        */
+const SUB_CLASSES=CLASSES.filter(c=>c.id!=='dolar').map(c=>c.id);
+const podeDetalhar=id=>SUB_CLASSES.includes(id);
+const subsOf=id=>(state.subativos&&state.subativos[id])||[];
+let _uidN=0;
+const uid=()=>'s'+Date.now().toString(36)+(_uidN++).toString(36);
+
+function subativosVazios(){const o={};SUB_CLASSES.forEach(id=>o[id]=[]);return o;}
+
+/* Garante o formato novo sem descartar nada do formato antigo. */
+function migrate(st){
+  st.months=st.months||[];
+  st.holdings=st.holdings||[];
+  st.subativos=Object.assign(subativosVazios(),st.subativos||{});
+  // carteira de ações antiga ({t,q}) vira sub-ativo da classe Ações
+  if(!st.subativos.acoes.length && st.holdings.length){
+    st.subativos.acoes=st.holdings.map(h=>({id:uid(),nome:h.t,q:+h.q||0}));
+  }
+  st.months.forEach(m=>{ if(!m.det||typeof m.det!=='object')m.det={}; });
+  return st;
+}
+/* Espelha o cadastro de ações no formato antigo, para não quebrar
+   backups nem versões anteriores do app. */
+function syncHoldings(){
+  state.holdings=subsOf('acoes').map(s=>({t:s.nome,q:+s.q||0}));
+}
 
 function seedState(){
   const months=SEED_DATA.map(r=>({
     date:r.date, acoes:r.acoes,cdb:r.cdb,fii:r.fii,caixa:r.caixa,dolar:r.dolar,cripto:r.cripto,etf_bdr:r.etf_bdr,
-    aporte:r.aporte, dividendos:r.dividendos, obs:r.obs||'', precos:r.precos||{}
+    aporte:r.aporte, dividendos:r.dividendos, obs:r.obs||'', precos:r.precos||{}, det:{}
   }));
   const last=SEED_DATA[SEED_DATA.length-1];
   const holdings=(last.stocks||[]).map(s=>({t:s.t,q:s.q}));
-  return {months,holdings};
+  return migrate({months,holdings});
 }
 let db=null, auth=null;
 async function load(){
   try{
     const snap=await db.collection('carteira').doc('dados').get();
-    if(snap.exists && snap.data() && snap.data().payload){ state=JSON.parse(snap.data().payload); }
+    if(snap.exists && snap.data() && snap.data().payload){ state=migrate(JSON.parse(snap.data().payload)); }
     else { state=seedState(); await save(); }
   }catch(e){
     hasStorage=false; state=seedState();
@@ -648,36 +710,114 @@ function renderBars(C){
 }
 
 /* ============ LANCAR ============ */
+/* Bloco de uma classe no lançamento: campo único (sem sub-ativos cadastrados)
+   ou lista expansível com um campo por sub-ativo + sobra "não detalhado". */
+function classBlockHTML(c,base,filled){
+  const subs=subsOf(c.id);
+  if(!podeDetalhar(c.id)||!subs.length){
+    return `<div class="field"><label>${c.nome} <span class="hint">R$</span></label>
+      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="${c.id}" value="${filled?fmtInput(base[c.id]):''}" placeholder="0,00"></div></div>`;
+  }
+  const det=(base.det&&base.det[c.id])||{};
+  const acao=c.id==='acoes';
+  /* Meses antigos (ou parcialmente detalhados) não têm `_outros` gravado.
+     A sobra é deduzida do total já lançado, para que abrir um mês antigo
+     para edição nunca zere a classe. */
+  const somaItens=subs.reduce((t,s)=>t+((det[s.id]&&+det[s.id].v)||0),0);
+  const outrosV=det._outros!=null?+det._outros:Math.max(0,Math.round(((+base[c.id]||0)-somaItens)*100)/100);
+  const rows=subs.map(s=>{
+    const it=det[s.id]||{};
+    const q=it.q!=null?it.q:(+s.q||0);
+    return `<div class="subrow${acao?' acao':''}" data-sub="${s.id}">
+      <div class="snome" title="${s.nome}">${s.nome}</div>
+      ${acao?`<div class="inp"><input type="text" inputmode="numeric" data-q="1" value="${q}" title="Quantidade"></div>
+      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-p="1" value="${it.p!=null?fmtInput(it.p):''}" placeholder="preço" title="Preço unitário"></div>`:''}
+      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-v="1" value="${it.v!=null?fmtInput(it.v):''}" placeholder="0,00" title="Valor total"></div>
+    </div>`;
+  }).join('');
+  return `<div class="clsblk" data-cls="${c.id}" style="grid-column:1/-1">
+    <details ${filled?'':'open'}>
+      <summary>
+        <span class="cchev"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></span>
+        <span class="cdot" style="background:${c.cor}"></span>
+        <span class="cnome">${c.nome}</span>
+        <span class="hint" style="font-size:11.5px;color:#9AA79F">${subs.length} ${subs.length===1?'item':'itens'}</span>
+        <span class="ctot num">—</span>
+      </summary>
+      ${acao?`<div class="subhead"><span>Papel</span><span>Qtd</span><span>Preço</span><span>Valor</span></div>`:''}
+      <div class="subrows">
+        ${rows}
+        <div class="subrow outros">
+          <div class="snome">Não detalhado</div>
+          ${acao?'<div></div><div></div>':''}
+          <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-o="1" value="${filled&&outrosV?fmtInput(outrosV):''}" placeholder="0,00"></div>
+        </div>
+      </div>
+    </details>
+    <input type="hidden" data-f="${c.id}" value="">
+  </div>`;
+}
+
+/* Recalcula o total de um bloco a partir dos sub-ativos e alimenta o campo
+   oculto que o resto do app (preview, save, gráficos) já consome. */
+function recalcCls(blk){
+  let t=0;
+  blk.querySelectorAll('.subrow[data-sub]').forEach(r=>{ t+=parseNum(r.querySelector('[data-v]').value); });
+  const oEl=blk.querySelector('[data-o]'); if(oEl)t+=parseNum(oEl.value);
+  blk.querySelector('input[data-f]').value=fmtInput(t);
+  blk.querySelector('.ctot').textContent=brl(t,0);
+}
+function recalcAllCls(){document.querySelectorAll('#lancar-form .clsblk').forEach(recalcCls);}
+
+/* Ações: quantidade × preço ↔ valor, nos dois sentidos. */
+function onSubInput(e){
+  const row=e.target.closest('.subrow[data-sub]');
+  if(row){
+    const qEl=row.querySelector('[data-q]'),pEl=row.querySelector('[data-p]'),vEl=row.querySelector('[data-v]');
+    if(qEl&&pEl){
+      const q=parseInt((qEl.value||'').replace(/\D/g,''))||0;
+      if(e.target===vEl){ const v=parseNum(vEl.value); pEl.value=q?fmtInput(v/q):''; }
+      else { const p=parseNum(pEl.value); if(p||e.target===pEl)vEl.value=fmtInput(q*p); }
+    }
+  }
+  const blk=e.target.closest('.clsblk'); if(blk)recalcCls(blk);
+}
+
 function renderLancar(){
   const C=computed();const prev=C[C.length-1];
   const form=document.getElementById('lancar-form');
-  const base = editIndex!==null ? state.months[editIndex] : {};
+  const base = baseOverride || (editIndex!==null ? state.months[editIndex] : {});
+  const filled = editIndex!==null || !!baseOverride;
   const today=new Date().toISOString().slice(0,10);
   const dateVal = editIndex!==null ? base.date : today;
   let html=`<div class="field" style="grid-column:1/-1;max-width:220px"><label>Data do fechamento</label>
     <div class="inp date"><input type="date" id="f-date" value="${dateVal}"></div></div>`;
-  CLASSES.forEach(c=>{
-    html+=`<div class="field"><label>${c.nome} <span class="hint">R$</span></label>
-      <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="${c.id}" value="${editIndex!==null?fmtInput(base[c.id]):''}" placeholder="0,00"></div></div>`;
-  });
+  CLASSES.forEach(c=>{ html+=classBlockHTML(c,base,filled); });
   html+=`<div class="field"><label>Aporte do mês <span class="hint">dinheiro novo</span></label>
-    <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="aporte" value="${editIndex!==null?fmtInput(base.aporte):''}" placeholder="0,00"></div></div>
+    <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="aporte" value="${filled?fmtInput(base.aporte):''}" placeholder="0,00"></div></div>
     <div class="field"><label>Dividendos recebidos</label>
-    <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="dividendos" value="${editIndex!==null?fmtInput(base.dividendos):''}" placeholder="0,00"></div></div>`;
+    <div class="inp"><span class="pre">R$</span><input type="text" inputmode="decimal" data-f="dividendos" value="${filled?fmtInput(base.dividendos):''}" placeholder="0,00"></div></div>`;
   html+=`<div class="field" style="grid-column:1/-1"><label>Observação <span class="hint">opcional — ex: vendi dólar, fiz cirurgia...</span></label>
-    <div class="inp" style="align-items:stretch"><textarea id="f-obs" rows="2" placeholder="Alguma nota sobre este mês?" style="width:100%;border:none;outline:none;background:transparent;font:inherit;resize:vertical;padding:10px 12px">${editIndex!==null?(base.obs||''):''}</textarea></div></div>`;
+    <div class="inp" style="align-items:stretch"><textarea id="f-obs" rows="2" placeholder="Alguma nota sobre este mês?" style="width:100%;border:none;outline:none;background:transparent;font:inherit;resize:vertical;padding:10px 12px">${filled?(base.obs||''):''}</textarea></div></div>`;
   form.innerHTML=html;
   const precos=document.getElementById('lancar-precos');
   const pdefs=[['dolar','Dólar (R$)'],['btc','Bitcoin (R$)'],['ltc','Litecoin (R$)'],['xrp','XRP (R$)']];
   precos.innerHTML=pdefs.map(([k,l])=>`<div class="field"><label>${l}</label><div class="inp"><span class="pre">R$</span>
-    <input type="text" inputmode="decimal" data-p="${k}" value="${editIndex!==null&&base.precos?fmtInput(base.precos[k]):''}" placeholder="0,00"></div></div>`).join('');
+    <input type="text" inputmode="decimal" data-p="${k}" value="${filled&&base.precos?fmtInput(base.precos[k]):''}" placeholder="0,00"></div></div>`).join('');
   document.getElementById('lancar-title').textContent = editIndex!==null?('Editando '+mLabel(base.date,true)):'Novo lançamento';
   document.getElementById('cancel-edit').style.display = editIndex!==null?'inline-block':'none';
   document.getElementById('copy-bar').style.display = (editIndex===null&&prev)?'flex':'none';
-  form.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',updatePreview));
-  document.getElementById('f-date').addEventListener('change',updatePreview);
+  recalcAllCls();
+  baseOverride=null;
   updatePreview();
 }
+/* Delegação: um único listener no formulário, que sobrevive aos re-renders.
+   A ordem importa — recalcular os sub-ativos antes de atualizar o preview. */
+(function bindLancarForm(){
+  const form=document.getElementById('lancar-form');
+  form.addEventListener('input',e=>{onSubInput(e);updatePreview();});
+  form.addEventListener('change',e=>{if(e.target.id==='f-date')updatePreview();});
+})();
 function fmtInput(v){return (v==null||v==='')?'':(+v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function parseNum(s){if(s==null)return 0;s=(''+s).trim();if(!s)return 0;s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:n;}
 function readForm(){
@@ -685,7 +825,30 @@ function readForm(){
   o.date=document.getElementById('f-date').value;
   const obsEl=document.getElementById('f-obs');o.obs=obsEl?obsEl.value.trim():'';
   o.precos={};document.querySelectorAll('#lancar-precos input[data-p]').forEach(i=>{const v=parseNum(i.value);if(v)o.precos[i.dataset.p]=v;});
+  o.det={};
+  document.querySelectorAll('#lancar-form .clsblk').forEach(blk=>{
+    const d={};
+    blk.querySelectorAll('.subrow[data-sub]').forEach(r=>{
+      const it={v:parseNum(r.querySelector('[data-v]').value)};
+      const qEl=r.querySelector('[data-q]'),pEl=r.querySelector('[data-p]');
+      if(qEl)it.q=parseInt((qEl.value||'').replace(/\D/g,''))||0;
+      if(pEl){const pv=parseNum(pEl.value);if(pv)it.p=pv;}
+      d[r.dataset.sub]=it;
+    });
+    const oEl=blk.querySelector('[data-o]');const outros=oEl?parseNum(oEl.value):0;
+    if(outros)d._outros=outros;
+    o.det[blk.dataset.cls]=d;
+  });
   return o;
+}
+/* Se o mês salvo for o mais recente, a quantidade digitada nele vira a
+   posição atual no cadastro de ativos. */
+function syncQtdFromMonth(m){
+  const ult=state.months[state.months.length-1];
+  if(!ult||ult.date!==m.date)return;
+  const d=(m.det&&m.det.acoes)||{};
+  subsOf('acoes').forEach(s=>{ if(d[s.id]&&d[s.id].q!=null)s.q=d[s.id].q; });
+  syncHoldings();
 }
 function updatePreview(){
   const o=readForm();const t=CLASSES.reduce((s,c)=>s+(+o[c.id]||0),0);
@@ -702,9 +865,9 @@ function updatePreview(){
 }
 document.getElementById('copy-prev').addEventListener('click',()=>{
   const C=computed();const prev=C[C.length-1];if(!prev)return;
-  CLASSES.forEach(c=>{const el=document.querySelector(`#lancar-form input[data-f="${c.id}"]`);el.value=fmtInput(prev[c.id]);});
-  if(prev.precos)document.querySelectorAll('#lancar-precos input[data-p]').forEach(i=>{if(prev.precos[i.dataset.p])i.value=fmtInput(prev.precos[i.dataset.p]);});
-  updatePreview();toast('Valores do mês anterior copiados. Agora é só ajustar.');
+  baseOverride={...prev,aporte:'',dividendos:'',obs:''};
+  renderLancar();
+  toast('Valores do mês anterior copiados. Agora é só ajustar.');
 });
 document.getElementById('save-month').addEventListener('click',()=>{
   const o=readForm();
@@ -713,7 +876,7 @@ document.getElementById('save-month').addEventListener('click',()=>{
   if(dupIdx>=0){toast('Já existe um lançamento nessa data. Edite-o no Histórico.',true);return;}
   if(editIndex!==null){state.months[editIndex]=o;editIndex=null;toast('Lançamento atualizado.');}
   else{state.months.push(o);toast('Lançamento salvo! 🎉');}
-  sortMonths();save();renderAll();goTo('painel');
+  sortMonths();syncQtdFromMonth(o);save();renderAll();goTo('painel');
 });
 document.getElementById('cancel-edit').addEventListener('click',()=>{editIndex=null;renderLancar();goTo('historico');});
 
@@ -742,19 +905,61 @@ document.getElementById('hist-year').addEventListener('change',renderHistorico);
 window.editMonth=i=>{editIndex=i;goTo('lancar');renderLancar();};
 window.delMonth=i=>{const m=state.months[i];confirmModal('Excluir lançamento?',`O registro de <b>${mLabel(m.date,true)}</b> será removido. Isso não pode ser desfeito.`,()=>{state.months.splice(i,1);save();renderAll();toast('Lançamento excluído.');});};
 
-/* ============ ACOES ============ */
-function renderAcoes(){
-  const el=document.getElementById('holdings');
-  if(!state.holdings.length){el.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum papel cadastrado. Clique em <b>+ Adicionar papel</b>.</div>';return;}
-  el.innerHTML=state.holdings.map((s,i)=>`<div class="card hold">
-    <input class="tk" style="border:none;font-weight:600;padding:0;font-size:15px" value="${s.t}" onchange="updStock(${i},'t',this.value)">
-    <div class="qwrap"><input type="text" inputmode="numeric" value="${s.q}" onchange="updStock(${i},'q',this.value)"></div>
-    <button class="icon-btn del rm" title="Remover" onclick="rmStock(${i})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
-  </div>`).join('');
+/* ============ ATIVOS (cadastro de sub-ativos) ============ */
+const PLACEHOLDER={acoes:'PETR4',cdb:'CDB Banco X 110% CDI',fii:'HGLG11',caixa:'Conta corrente',cripto:'Bitcoin',etf_bdr:'IVVB11'};
+
+function renderAtivos(){
+  const el=document.getElementById('ativos-lista');
+  el.innerHTML=CLASSES.filter(c=>podeDetalhar(c.id)).map(c=>{
+    const subs=subsOf(c.id);const acao=c.id==='acoes';
+    const linhas=subs.map(sub=>`<div class="subedit${acao?'':' semq'}">
+      <input value="${sub.nome.replace(/"/g,'&quot;')}" onchange="updSub('${c.id}','${sub.id}','nome',this.value)" placeholder="Nome do ativo">
+      ${acao?`<input class="q" type="text" inputmode="numeric" value="${+sub.q||0}" onchange="updSub('${c.id}','${sub.id}','q',this.value)" title="Quantidade de cotas">`:''}
+      <button class="icon-btn del" title="Remover" onclick="rmSub('${c.id}','${sub.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+    </div>`).join('');
+    return `<div class="card ativos-cls">
+      <div class="clshead">
+        <span class="cdot" style="background:${c.cor}"></span>
+        <span class="cnome">${c.nome}</span>
+        <span class="hint" style="font-size:11.5px;color:#9AA79F">${subs.length?subs.length+(subs.length===1?' item':' itens'):'sem detalhamento'}</span>
+        <button class="btn ghost sm" style="margin-left:auto" onclick="addSub('${c.id}')">+ Adicionar</button>
+      </div>
+      ${subs.length?`<div class="sublist">${linhas}</div>`
+        :`<div class="vazio">Sem sub-ativos. Enquanto estiver assim, <b>${c.nome}</b> continua sendo lançado como um valor único.</div>`}
+    </div>`;
+  }).join('')+`<p class="tip">O Dólar não aparece aqui: é um ativo único, lançado direto.</p>`;
 }
-window.updStock=(i,f,v)=>{state.holdings[i][f]=f==='q'?(parseInt((''+v).replace(/\D/g,''))||0):(''+v).toUpperCase().trim();save();if(f==='t')renderAcoes();};
-window.rmStock=i=>{state.holdings.splice(i,1);save();renderAcoes();};
-document.getElementById('add-stock').addEventListener('click',()=>{state.holdings.push({t:'NOVO3',q:0});save();renderAcoes();});
+
+window.addSub=cls=>{
+  state.subativos[cls].push({id:uid(),nome:PLACEHOLDER[cls]||'Novo ativo',q:cls==='acoes'?0:undefined});
+  if(cls==='acoes')syncHoldings();
+  save();renderAtivos();
+};
+window.updSub=(cls,id,campo,valor)=>{
+  const sub=subsOf(cls).find(x=>x.id===id);if(!sub)return;
+  if(campo==='q')sub.q=parseInt((''+valor).replace(/\D/g,''))||0;
+  else sub.nome=(''+valor).trim()||sub.nome;
+  if(cls==='acoes')syncHoldings();
+  save();if(campo==='nome')renderAtivos();
+};
+window.rmSub=(cls,id)=>{
+  const sub=subsOf(cls).find(x=>x.id===id);if(!sub)return;
+  const usado=state.months.filter(m=>m.det&&m.det[cls]&&m.det[cls][id]).length;
+  confirmModal('Remover sub-ativo?',
+    `<b>${sub.nome}</b> sai do cadastro.`+(usado?` Os valores já lançados em ${usado} ${usado===1?'mês':'meses'} serão somados a <b>“Não detalhado”</b>, então nenhum total muda.`:''),
+    ()=>{
+      // preserva o histórico: o valor do item vira sobra não detalhada
+      state.months.forEach(m=>{
+        const d=m.det&&m.det[cls];if(!d||!d[id])return;
+        d._outros=(+d._outros||0)+(+d[id].v||0);
+        if(!d._outros)delete d._outros;
+        delete d[id];
+      });
+      state.subativos[cls]=subsOf(cls).filter(x=>x.id!==id);
+      if(cls==='acoes')syncHoldings();
+      save();renderAtivos();toast('Sub-ativo removido.');
+    });
+};
 
 /* ============ RELATORIO ============ */
 function renderRelatorio(){
@@ -895,7 +1100,7 @@ document.getElementById('exp-json').addEventListener('click',()=>{
 document.getElementById('imp-json').addEventListener('click',()=>document.getElementById('imp-file').click());
 document.getElementById('imp-file').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;const rd=new FileReader();
-  rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.months)throw 0;state=d;sortMonths();save();renderAll();toast('Backup restaurado com sucesso.');goTo('painel');}catch(err){toast('Arquivo inválido.',true);}};
+  rd.onload=()=>{try{const d=JSON.parse(rd.result);if(!d.months)throw 0;state=migrate(d);sortMonths();save();renderAll();toast('Backup restaurado com sucesso.');goTo('painel');}catch(err){toast('Arquivo inválido.',true);}};
   rd.readAsText(f);e.target.value='';
 });
 document.getElementById('exp-csv').addEventListener('click',()=>{
@@ -939,7 +1144,7 @@ document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='
 let toastT;function toast(msg,err){const t=document.getElementById('toast');t.textContent=msg;t.className='show'+(err?' err':'');clearTimeout(toastT);toastT=setTimeout(()=>t.className='',2600);}
 
 /* ============ Render all ============ */
-function renderAll(){renderPainel();renderHistorico();renderAcoes();renderRelatorio();
+function renderAll(){renderPainel();renderHistorico();renderAtivos();renderRelatorio();
   const st=document.getElementById('storage-status');
   st.innerHTML = hasStorage
     ? '☁️ Tudo salvo na nuvem automaticamente. Abre em qualquer aparelho com o mesmo login.'
